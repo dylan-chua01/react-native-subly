@@ -26,7 +26,6 @@ const UpcomingSubscriptionCard = ({
       <Text className="upcoming-name" numberOfLines={1}>
         {name}
       </Text>
-      <Text>UpcomingSubscriptionCard</Text>
     </View>
   );
 };
