@@ -29,5 +29,4 @@ const UpcomingSubscriptionCard = ({
     </View>
   );
 };
-
 export default UpcomingSubscriptionCard;
