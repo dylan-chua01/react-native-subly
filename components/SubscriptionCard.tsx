@@ -6,9 +6,6 @@ import {
 import clsx from "clsx";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
-import { usePostHog } from "posthog-react-native";
-
-const fallback = "Not provided";
 
 const SubscriptionCard = ({
   name,
@@ -26,23 +23,9 @@ const SubscriptionCard = ({
   startDate,
   status,
 }: SubscriptionCardProps) => {
-  const posthog = usePostHog();
-
-  const handlePress = () => {
-    if (!expanded) {
-      posthog.capture("subscription_card_expanded", {
-        subscription_name: name,
-        ...(category && { category }),
-        billing,
-        ...(currency && { currency }),
-      });
-    }
-    onPress();
-  };
-
   return (
     <Pressable
-      onPress={handlePress}
+      onPress={onPress}
       className={clsx("sub-card", expanded ? "sub-card-expanded" : "bg-card")}
       style={!expanded && color ? { backgroundColor: color } : undefined}
     >
@@ -56,9 +39,7 @@ const SubscriptionCard = ({
             <Text numberOfLines={1} ellipsizeMode="tail" className="sub-meta">
               {category?.trim() ||
                 plan?.trim() ||
-                (renewalDate
-                  ? formatSubscriptionDateTime(renewalDate)
-                  : fallback)}
+                (renewalDate ? formatSubscriptionDateTime(renewalDate) : "")}
             </Text>
           </View>
         </View>
@@ -70,7 +51,7 @@ const SubscriptionCard = ({
       </View>
 
       {expanded && (
-        <View className="sub-body">
+        <View className="sub-bdy">
           <View className="sub-details">
             <View className="sub-row">
               <View className="sub-row-copy">
@@ -80,7 +61,7 @@ const SubscriptionCard = ({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {paymentMethod?.trim() || fallback}
+                  {paymentMethod?.trim() ?? "Not provided"}
                 </Text>
               </View>
             </View>
@@ -92,7 +73,7 @@ const SubscriptionCard = ({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {category?.trim() || fallback}
+                  {(category?.trim() || plan?.trim()) ?? "Not provided"}
                 </Text>
               </View>
             </View>
@@ -104,13 +85,15 @@ const SubscriptionCard = ({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {startDate ? formatSubscriptionDateTime(startDate) : fallback}
+                  {startDate
+                    ? formatSubscriptionDateTime(startDate)
+                    : "Not provided"}
                 </Text>
               </View>
             </View>
             <View className="sub-row">
               <View className="sub-row-copy">
-                <Text className="sub-label">Renewal Date:</Text>
+                <Text className="sub-label">Renewal date:</Text>
                 <Text
                   className="sub-value"
                   numberOfLines={1}
@@ -118,7 +101,7 @@ const SubscriptionCard = ({
                 >
                   {renewalDate
                     ? formatSubscriptionDateTime(renewalDate)
-                    : fallback}
+                    : "Not provided"}
                 </Text>
               </View>
             </View>
@@ -130,7 +113,7 @@ const SubscriptionCard = ({
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {status ? formatStatusLabel(status) : fallback}
+                  {status ? formatStatusLabel(status) : "Not provided"}
                 </Text>
               </View>
             </View>
@@ -140,5 +123,4 @@ const SubscriptionCard = ({
     </Pressable>
   );
 };
-
 export default SubscriptionCard;
