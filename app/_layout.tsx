@@ -1,21 +1,22 @@
 import "@/global.css";
+import { posthog } from "@/lib/posthog";
 import { ClerkProvider, useAuth } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { useFonts } from "expo-font";
-import { Redirect, Slot, SplashScreen } from "expo-router";
+import { Slot, SplashScreen } from "expo-router";
+import { PostHogProvider } from "posthog-react-native";
 import { useEffect } from "react";
+import { Text, View } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
-
 if (!publishableKey) {
   throw new Error("Add your Clerk Publishable Key to the .env file");
 }
 
 function RootLayoutContent() {
-  const { isLoaded: authLoaded, isSignedIn } = useAuth();
-
+  const { isLoaded: authLoaded } = useAuth();
   const [fontsLoaded] = useFonts({
     "sans-regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
     "sans-bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
@@ -31,11 +32,12 @@ function RootLayoutContent() {
     }
   }, [fontsLoaded, authLoaded]);
 
-  if (!fontsLoaded || !authLoaded) return null;
-
-  // Redirect to sign-in if not authenticated, otherwise show the app
-  if (!isSignedIn) {
-    return <Redirect href="/(auth)/sign-in" />;
+  if (!fontsLoaded || !authLoaded) {
+    return (
+      <View className="flex-1 justify-center items-center bg-background">
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
   return <Slot />;
@@ -44,7 +46,16 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <RootLayoutContent />
+      <PostHogProvider
+        client={posthog}
+        autocapture={{
+          captureScreens: false,
+          captureTouches: true,
+          propsToCapture: ["testID"],
+        }}
+      >
+        <RootLayoutContent />
+      </PostHogProvider>
     </ClerkProvider>
   );
 }

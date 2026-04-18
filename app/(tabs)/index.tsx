@@ -13,6 +13,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/expo";
 import dayjs from "dayjs";
 import { styled } from "nativewind";
+import { usePostHog } from "posthog-react-native";
 import { useState } from "react";
 import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
@@ -21,6 +22,7 @@ const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
   const { user } = useUser();
+  const posthog = usePostHog();
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
     string | null
   >(null);
@@ -48,7 +50,12 @@ export default function App() {
                 <Text className="home-user-name">{displayName}</Text>
               </View>
 
-              <Pressable onPress={() => setIsModalVisible(true)}>
+              <Pressable
+                onPress={() => {
+                  posthog.capture("add_subscription_tapped");
+                  setIsModalVisible(true);
+                }}
+              >
                 <Image source={icons.add} className="home-add-icon" />
               </Pressable>
             </View>
